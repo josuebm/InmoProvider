@@ -1,0 +1,117 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.josu.inmoprovider.Anadir">
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/etLocalidad"
+        android:hint="@string/etLocalidad"
+        android:layout_toEndOf="@+id/tvHabitaciones"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_alignRight="@+id/etDireccion"
+        android:layout_alignEnd="@+id/etDireccion" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/etDireccion"
+        android:layout_below="@+id/etLocalidad"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="@string/etDireccion"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_alignRight="@+id/spTipo"
+        android:layout_alignEnd="@+id/spTipo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tvTipo"
+        android:id="@+id/tvTipo"
+        android:layout_below="@+id/etDireccion"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="5dp" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spTipo"
+        android:layout_toEndOf="@+id/tvTipo"
+        android:layout_below="@+id/etDireccion"
+        android:layout_toRightOf="@+id/tvTipo"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_alignRight="@+id/spHabitaciones"
+        android:layout_alignEnd="@+id/spHabitaciones" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/etPrecio"
+        android:hint="@string/etPrecio"
+        android:layout_toEndOf="@+id/tvTipo"
+        android:layout_below="@+id/spHabitaciones"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_alignRight="@+id/spHabitaciones"
+        android:layout_alignEnd="@+id/spHabitaciones" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_anadir"
+        android:id="@+id/btAnadir"
+        android:onClick="anadir"
+        android:layout_below="@+id/tvFoto"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tvHabitaciones"
+        android:id="@+id/tvHabitaciones"
+        android:layout_below="@+id/spTipo"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="5dp" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spHabitaciones"
+        android:layout_toEndOf="@+id/tvHabitaciones"
+        android:layout_below="@+id/spTipo"
+        android:layout_toRightOf="@+id/tvHabitaciones"
+        android:layout_margin="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/etPrecio"
+        android:id="@+id/tvFoto"
+        android:layout_below="@+id/etPrecio"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>

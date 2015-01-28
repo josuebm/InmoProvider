@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Inmobiliaria</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_anadir">Añadir</string>
+    <string name="action_editar">Editar</string>
+    <string name="action_eliminar">Eliminar</string>
+    <string name="title_activity_pruebas">Pruebas</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_secundaria">Secundaria</string>
+    <string name="title_activity_anadir">Anadir</string>
+    <string name="fotos_anadidas">foto(s) añadidas</string>
+    <string name="etLocalidad">Localidad</string>
+    <string name="etDireccion">Dirección</string>
+    <string name="tvTipo">Tipo: </string>
+    <string name="tvHabitaciones">Habitaciones: </string>
+    <string name="etPrecio">Precio</string>
+    <string name="tvFotosAnadidas">Fotos añadidas</string>
+
+    <string-array name="tipos">
+        <item>Piso</item>
+        <item>Casa</item>
+        <item>Estudio</item>
+        <item>Local</item>
+    </string-array>
+
+    <string-array name="habitaciones">
+        <item>1 habitación</item>
+        <item>2 habitaciones</item>
+        <item>3 habitaciones</item>
+        <item>4 habitaciones</item>
+        <item>5 habitaciones</item>
+    </string-array>
+
+</resources>
