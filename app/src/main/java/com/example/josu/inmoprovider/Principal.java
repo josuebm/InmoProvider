@@ -32,20 +32,17 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     private final int SECUNDARIA = 2;
     private final int ANADIR = 3;
     private final int EDITAR = 4;
-    private ImageView ivFoto, iv;
+    private ImageView ivFoto;
     int posicion, contador;
     private ArrayList <Foto> fotos;
-    private Loader loader;
     private GestorInmuebleProvider gip;
-    private float punto = 0;
     private GestorFotoProvider gfp;
-    private Inmueble inmuebleActual;
-    private Cursor cur;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
+        getLoaderManager().initLoader(0, null, this);
         fotos = new ArrayList();
         ivFoto = (ImageView)findViewById(R.id.ivFoto);
 
@@ -67,7 +64,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                 if (horizontal) {
                     posicion = position;
                     contador = 0;
-                    inmuebleActual = inmueble;
                     if(gfp.select(id) != null)
                         fotos = gfp.select(inmueble.getId());
 
@@ -82,14 +78,14 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         registerForContextMenu(lv);
         ad = new Adaptador(this, null);
         lv.setAdapter(ad);
-        loader = getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == ANADIR || requestCode == EDITAR && resultCode == RESULT_OK){
-            loader.onContentChanged();
+
+            //ELIMINAR QUE DEVUELVA RESULTADO
         }
         else
         if (requestCode == SECUNDARIA && resultCode == RESULT_OK) {
@@ -137,7 +133,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         cursor.close();
         if (id == R.id.action_eliminar) {
             gip.delete(inmueble);
-            loader.onContentChanged();
             return true;
         }else if (id == R.id.action_editar) {
             Intent intent = new Intent(this, Anadir.class);
