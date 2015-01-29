@@ -42,7 +42,7 @@ public class Adaptador extends CursorAdapter {
         tv3 = (TextView)view.findViewById(R.id.tvLocalidad);
         tv4 = (TextView)view.findViewById(R.id.tvPrecio);
         iv = (ImageView)view.findViewById(R.id.iv);
-        Inmueble inmueble = GestorInmueble.getRow(cursor);
+        Inmueble inmueble = GestorInmuebleProvider.getRow(cursor);
         tv1.setText(tipo(inmueble));
         tv2.setText(inmueble.getDireccion());
         tv3.setText(inmueble.getLocalidad());

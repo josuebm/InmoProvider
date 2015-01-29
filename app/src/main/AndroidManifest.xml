@@ -23,8 +23,19 @@
             android:label="@string/title_activity_secundaria" >
         </activity>
         <activity
+            android:name=".PantallaCompleta"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
+        <activity
             android:name=".Anadir"
             android:label="@string/title_activity_anadir" >
         </activity>
+        <provider
+            android:name=".Proveedor"
+            android:authorities="com.example.josu.inmoprovider"
+            android:enabled="true"
+            android:exported="true" >
+        </provider>
     </application>
+
 </manifest>

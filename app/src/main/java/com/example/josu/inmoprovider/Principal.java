@@ -6,7 +6,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v7.app.ActionBarActivity;
+import android.net.Uri;
+import android.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.view.MotionEvent;
+import android.widget.CursorAdapter;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -20,19 +26,21 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 
-public class Principal extends Activity {
+public class Principal extends Activity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    //private ListView listaInmuebles;
-    private ArrayList<Inmueble> lista;
     private Adaptador ad;
     private final int SECUNDARIA = 2;
     private final int ANADIR = 3;
     private final int EDITAR = 4;
-    private ImageView ivFoto;
+    private ImageView ivFoto, iv;
     int posicion, contador;
-    private GestorInmueble gi;
-    private GestorFoto gf;
     private ArrayList <Foto> fotos;
+    private Loader loader;
+    private GestorInmuebleProvider gip;
+    private float punto = 0;
+    private GestorFotoProvider gfp;
+    private Inmueble inmuebleActual;
+    private Cursor cur;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -40,7 +48,10 @@ public class Principal extends Activity {
         setContentView(R.layout.activity_principal);
         fotos = new ArrayList();
         ivFoto = (ImageView)findViewById(R.id.ivFoto);
-        gi = new GestorInmueble(this);
+
+        gip = new GestorInmuebleProvider(this);
+        gfp = new GestorFotoProvider(this);
+
         final ListView lv = (ListView) findViewById(R.id.listaInmuebles);
         final Context contexto = this;
         final DetalleListaInmuebles fragmentoDetalle = (DetalleListaInmuebles) getFragmentManager().findFragmentById(R.id.fragment4);
@@ -48,45 +59,37 @@ public class Principal extends Activity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Cursor cursor = gi.getCursor();
+                Cursor cursor = gip.getCursor();
                 cursor.moveToPosition(position);
-                Inmueble inmueble = GestorInmueble.getRow(cursor);
+                Inmueble inmueble = GestorInmuebleProvider.getRow(cursor);
                 cursor.close();
 
                 if (horizontal) {
                     posicion = position;
                     contador = 0;
-
-                    gf = new GestorFoto(contexto);
-                    gf.open();
-                    if(gf.select(id) != null)
-                        fotos = gf.select(inmueble.getId());
+                    inmuebleActual = inmueble;
+                    if(gfp.select(id) != null)
+                        fotos = gfp.select(inmueble.getId());
 
                     cargarImagenes();
                 } else {
                     Intent intent = new Intent(contexto, Secundaria.class);
-                    gi.open();
-                    cursor.close();
                     intent.putExtra("id", inmueble.getId());
                     startActivityForResult(intent, SECUNDARIA);
                 }
             }
         });
-
-        gi.open();
-        Cursor c = gi.getCursor();
-        ad = new Adaptador(this, c);
-        lv.setAdapter(ad);
-
         registerForContextMenu(lv);
+        ad = new Adaptador(this, null);
+        lv.setAdapter(ad);
+        loader = getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == ANADIR || requestCode == EDITAR && resultCode == RESULT_OK){
-            Cursor cursor = gi.getCursor();
-            ad.changeCursor(cursor);
+            loader.onContentChanged();
         }
         else
         if (requestCode == SECUNDARIA && resultCode == RESULT_OK) {
@@ -128,18 +131,17 @@ public class Principal extends Activity {
         int id=item.getItemId();
         AdapterView.AdapterContextMenuInfo info= (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
         int index= info.position;
-        Cursor cursor = gi.getCursor();
+        Cursor cursor = gip.getCursor();
         cursor.moveToPosition(index);
-        Inmueble in = GestorInmueble.getRow(cursor);
+        Inmueble inmueble = GestorInmuebleProvider.getRow(cursor);
+        cursor.close();
         if (id == R.id.action_eliminar) {
-            gi.delete(in);
-            cursor.close();
-            cursor = gi.getCursor();
-            ad.changeCursor(cursor);
+            gip.delete(inmueble);
+            loader.onContentChanged();
             return true;
         }else if (id == R.id.action_editar) {
             Intent intent = new Intent(this, Anadir.class);
-            intent.putExtra("posicion", index);
+            intent.putExtra("inmueble", inmueble);
             intent.putExtra("accion", "editar");
             startActivityForResult(intent, EDITAR);
             return true;
@@ -179,4 +181,23 @@ public class Principal extends Activity {
             ivFoto.setImageBitmap(imagen);
         }
     }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri = Contrato.TablaInmueble.CONTENT_URI;
+        return new CursorLoader(
+                this, uri, null, null, null,
+                Contrato.TablaInmueble._ID +" collate localized asc");
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        ad.swapCursor(null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ad.swapCursor(data);
+    }
+
 }

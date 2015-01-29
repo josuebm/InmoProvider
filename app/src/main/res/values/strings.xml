@@ -17,6 +17,8 @@
     <string name="tvHabitaciones">Habitaciones: </string>
     <string name="etPrecio">Precio</string>
     <string name="tvFotosAnadidas">Fotos añadidas</string>
+    <string name="primera_foto">Es la primera foto de la galería</string>
+    <string name="ultima_foto">Es la última foto de la galería</string>
 
     <string-array name="tipos">
         <item>Piso</item>

@@ -18,21 +18,20 @@ public class Secundaria extends Activity {
 
     private ImageView iv;
     private int contador, posicion;
-    private GestorFoto gf;
     private ArrayList<Foto> fotos;
+    private GestorFotoProvider gfp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        gfp = new GestorFotoProvider(this);
         contador = 0;
         fotos = new ArrayList();
         setContentView(R.layout.activity_secundaria);
         long id = (Long)getIntent().getExtras().get("id");
-        gf = new GestorFoto(this);
-        gf.open();
-        if(gf.select(id) != null)
-            fotos = gf.select(id);
+        if(gfp.select(id) != null)
+            fotos = gfp.select(id);
         iv = (ImageView)findViewById(R.id.ivFoto);
         cargarImagenes();
     }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -28,89 +29,45 @@ import java.util.GregorianCalendar;
 
 public class Anadir extends Activity {
 
-    private ArrayList<Inmueble> lista;
     private EditText etLocalidad, etDireccion, etPrecio;
     private Spinner spHabitaciones, spTipo;
     private Button boton;
     private String accion;
-    private int posicion;
     private int numFotos;
     private TextView tvFotos;
-    private ArrayList<Foto> fotos;
-    private long id;
-    private GestorInmueble gi;
-    private GestorFoto gf;
+    private Uri uri;
+    private GestorInmuebleProvider gip;
+    private Inmueble inmuebleActual;
+    private GestorFotoProvider gfp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_anadir);
 
-        gi = new GestorInmueble(this);
-        gi.open();
-
-        gf = new GestorFoto(this);
-        gf.open();
-
-        fotos = new ArrayList();
+        gip = new GestorInmuebleProvider(this);
+        gfp = new GestorFotoProvider(this);
 
         accion = (String)getIntent().getExtras().get("accion");
-
-        //lista = (ArrayList<Inmueble>)getIntent().getExtras().get("lista");
-        etLocalidad = (EditText)findViewById(R.id.etLocalidad);
-        etDireccion = (EditText)findViewById(R.id.etDireccion);
-        etPrecio = (EditText)findViewById(R.id.etPrecio);
-        spHabitaciones = (Spinner)findViewById(R.id.spHabitaciones);
-        ArrayAdapter<CharSequence> adapterHabitaciones = ArrayAdapter.createFromResource(this, R.array.habitaciones, android.R.layout.simple_spinner_item);
-        adapterHabitaciones.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spHabitaciones.setAdapter(adapterHabitaciones);
-
-        spTipo = (Spinner)findViewById(R.id.spTipo);
-        ArrayAdapter<CharSequence> adapterTipos = ArrayAdapter.createFromResource(this, R.array.tipos, android.R.layout.simple_spinner_item);
-        adapterTipos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spTipo.setAdapter(adapterTipos);
-
-        boton = (Button)findViewById(R.id.btAnadir);
-
         numFotos = 0;
-        tvFotos = (TextView)findViewById(R.id.tvFoto);
-        tvFotos.setVisibility(View.INVISIBLE);
+        initComponents();
 
         if(accion.equals("editar")){
-            posicion = (Integer)getIntent().getExtras().get("posicion");
-
-            Cursor cursor = gi.getCursor();
-            cursor.moveToPosition(posicion);
-            Inmueble inmueble = GestorInmueble.getRow(cursor);
-            cursor.close();
-
-            if(gf.select(inmueble.getId()) != null){
-                fotos = gf.select(inmueble.getId());
-            }
-
-            etLocalidad.setText(inmueble.getLocalidad());
-            etDireccion.setText(inmueble.getDireccion());
-            etPrecio.setText(inmueble.getPrecio() + " €");
-            spHabitaciones.setSelection(inmueble.getHabitaciones());
-            spTipo.setSelection(inmueble.getTipo());
+            inmuebleActual = (Inmueble)getIntent().getExtras().get("inmueble");
+            etLocalidad.setText(inmuebleActual.getLocalidad());
+            etDireccion.setText(inmuebleActual.getDireccion());
+            etPrecio.setText(inmuebleActual.getPrecio() + " €");
+            spHabitaciones.setSelection(inmuebleActual.getHabitaciones());
+            spTipo.setSelection(inmuebleActual.getTipo());
             boton.setText(getResources().getString(R.string.action_editar));
-            id = inmueble.getId();
         }
-        //else{
-            /*CREO QUE NO TENGO QUE TENER ESTO EN CUENTA PORQUE EL ID SE GENERA DE FORMA AUTOMÁTICA
-            boton.setText(getResources().getString(R.string.action_anadir));
-            if(lista.size() == 0)
-                id = 0;
-            else
-                id = lista.get(lista.size()-1).getId()+1;
-                */
-        //}
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.anadir, menu);
+        if(accion.equals("editar"))
+            getMenuInflater().inflate(R.menu.anadir, menu);
         return true;
     }
 
@@ -127,32 +84,23 @@ public class Anadir extends Activity {
     public void anadir(View v){
         if(!accion.equals("editar")){
             Inmueble inmueble = new Inmueble(spHabitaciones.getSelectedItemPosition(), 0, spTipo.getSelectedItemPosition(), Float.valueOf(etPrecio.getText().toString()), etLocalidad.getText().toString(), etDireccion.getText().toString());
-            id = gi.insert(inmueble);
-            Log.v("ANADIR", inmueble.toString());
+            uri = gip.insert(inmueble);
         }
 
         else{
-            Cursor cursor = gi.getCursor();
-            cursor.moveToPosition(posicion);
-            Inmueble inmueble = GestorInmueble.getRow(cursor);
-            cursor.close();
-            inmueble.setLocalidad(etLocalidad.getText().toString());
-            inmueble.setDireccion(etDireccion.getText().toString());
-            inmueble.setTipo(spTipo.getSelectedItemPosition());
-            inmueble.setHabitaciones(spHabitaciones.getSelectedItemPosition());
+            inmuebleActual.setLocalidad(etLocalidad.getText().toString());
+            inmuebleActual.setDireccion(etDireccion.getText().toString());
+            inmuebleActual.setTipo(spTipo.getSelectedItemPosition());
+            inmuebleActual.setHabitaciones(spHabitaciones.getSelectedItemPosition());
             if(etPrecio.getText().toString().endsWith("€"))
                 etPrecio.setText(etPrecio.getText().toString().replace("€", ""));
-            inmueble.setPrecio(Float.valueOf(etPrecio.getText().toString()));
-            gi.update(inmueble);
-            //lista.get(posicion).setFotos(fotos);
+            inmuebleActual.setPrecio(Float.valueOf(etPrecio.getText().toString()));
+            int actualizado = gip.update(inmuebleActual);
+            tostada("Si es 1 es satisfactorio si es 0 es que no se ha actualizado la base de datos: " + actualizado);
         }
+
         Intent i = new Intent();
-
-        if(!accion.equals("editar"))
-            setResult(RESULT_OK, i);
-        else
-            setResult(RESULT_OK, i);
-
+        setResult(RESULT_OK, i);
         finish();
     }
 
@@ -193,10 +141,9 @@ public class Anadir extends Activity {
             if (tvFotos.getVisibility() == View.INVISIBLE)
                 tvFotos.setVisibility(View.VISIBLE);
             tvFotos.setText(numFotos + " " + getResources().getString(R.string.fotos_anadidas));
-            //fotos.add(archivo.getPath());
-            //archivo.getAbsolutePath()
-            //tostada(archivo.getAbsolutePath());
-            gf.insert(new Foto(id, archivo.getAbsolutePath()));
+            Foto f = new Foto(inmuebleActual.getId(), archivo.getAbsolutePath());
+            //gf.insert(f);
+            gfp.insert(f);
         }
     }
 
@@ -227,8 +174,25 @@ public class Anadir extends Activity {
         String segundo = String.valueOf(fecha.get(Calendar.SECOND));
         if(segundo.length() == 1)
             segundo = "0" + segundo;
-        nombre = "Inmueble_" + id + "_" + year + "_" + mes + "_" + dia + "_" + hora + "_" + minuto + "_" + segundo + ".jpg";
+        nombre = "Inmueble_" + inmuebleActual.getId() + "_" + year + "_" + mes + "_" + dia + "_" + hora + "_" + minuto + "_" + segundo + ".jpg";
         return nombre;
 
+    }
+
+    public void initComponents(){
+        etLocalidad = (EditText)findViewById(R.id.etLocalidad);
+        etDireccion = (EditText)findViewById(R.id.etDireccion);
+        etPrecio = (EditText)findViewById(R.id.etPrecio);
+        spHabitaciones = (Spinner)findViewById(R.id.spHabitaciones);
+        ArrayAdapter<CharSequence> adapterHabitaciones = ArrayAdapter.createFromResource(this, R.array.habitaciones, android.R.layout.simple_spinner_item);
+        adapterHabitaciones.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spHabitaciones.setAdapter(adapterHabitaciones);
+        spTipo = (Spinner)findViewById(R.id.spTipo);
+        ArrayAdapter<CharSequence> adapterTipos = ArrayAdapter.createFromResource(this, R.array.tipos, android.R.layout.simple_spinner_item);
+        adapterTipos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spTipo.setAdapter(adapterTipos);
+        boton = (Button)findViewById(R.id.btAnadir);
+        tvFotos = (TextView)findViewById(R.id.tvFoto);
+        tvFotos.setVisibility(View.INVISIBLE);
     }
 }
