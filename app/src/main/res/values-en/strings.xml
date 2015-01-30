@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Inmobiliaria</string>
+    <string name="action_anadir">Add</string>
+    <string name="action_editar">Edit</string>
+    <string name="action_eliminar">Delete</string>
+    <string name="action_foto">Photo</string>
+    <string name="preferencias_compartidas">Josué</string>
+    <string name="title_activity_anadir">Add</string>
+    <string name="title_activity_editar">Edit</string>
+    <string name="fotos_anadidas">photo(s) added</string>
+    <string name="etLocalidad">Town</string>
+    <string name="etDireccion">Address</string>
+    <string name="tvTipo">Type: </string>
+    <string name="tvHabitaciones">Rooms: </string>
+    <string name="etPrecio">Price</string>
+    <string name="tvFotosAnadidas">Photos added</string>
+    <string name="actualizar_ok">Property successfully updated</string>
+    <string name="actualizar_no">Property not updated</string>
+    <string name="anadir_ok">Property successfullt added</string>
+    <string name="eliminar_todo">Property and photos deleted</string>
+    <string name="eliminar_inmueble">Property deleted</string>
+    <string name="eliminar_no">Property not deleted</string>
+    <string name="cambio_usuario">User</string>
+
+    <string-array name="tipos">
+        <item>Flat</item>
+        <item>House</item>
+        <item>Apartment</item>
+        <item>Store</item>
+    </string-array>
+
+    <string-array name="habitaciones">
+        <item>1 room</item>
+        <item>2 rooms</item>
+        <item>3 rooms</item>
+        <item>4 rooms</item>
+        <item>5 rooms</item>
+    </string-array>
+
+</resources>
