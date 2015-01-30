@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.josu.inmoprovider" >
+    package="com.example.josu.inmoprov" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Principal"
+            android:name="com.example.josu.inmoprov.Principal"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,20 +19,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Secundaria"
-            android:label="@string/title_activity_secundaria" >
-        </activity>
-        <activity
-            android:name=".PantallaCompleta"
+            android:name="com.example.josu.inmoprov.Secundaria"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
         <activity
-            android:name=".Anadir"
+            android:name="com.example.josu.inmoprov.Anadir"
             android:label="@string/title_activity_anadir" >
         </activity>
         <provider
-            android:name=".Proveedor"
-            android:authorities="com.example.josu.inmoprovider"
+            android:name="com.example.josu.inmoprov.Proveedor"
+            android:authorities="com.example.josu.inmoprov"
             android:enabled="true"
             android:exported="true" >
         </provider>

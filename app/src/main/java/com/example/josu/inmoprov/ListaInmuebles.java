@@ -1,4 +1,4 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 
 import android.app.Fragment;

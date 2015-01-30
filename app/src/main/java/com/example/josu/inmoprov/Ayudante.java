@@ -1,4 +1,5 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -28,7 +29,7 @@ public class Ayudante extends SQLiteOpenHelper {
         sql = "create table " + Contrato.TablaFoto.TABLA + "( " +
                 Contrato.TablaFoto._ID + " integer primary key autoincrement, " +
                 Contrato.TablaFoto.ID_INMUEBLE + " integer, " +
-                Contrato.TablaFoto.RUTA + " text, " + //no sé si aquí va coma o no
+                Contrato.TablaFoto.RUTA + " text, " +
                 " foreign key (" + Contrato.TablaFoto.ID_INMUEBLE + ") references " + Contrato.TablaInmueble.TABLA + "(" + Contrato.TablaInmueble._ID + ")" +
                 ")";
         db.execSQL(sql);

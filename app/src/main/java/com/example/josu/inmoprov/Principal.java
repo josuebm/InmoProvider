@@ -1,18 +1,18 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Loader;
-import android.view.MotionEvent;
-import android.widget.CursorAdapter;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -20,29 +20,32 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+import java.io.File;
 import java.util.ArrayList;
 
 
 public class Principal extends Activity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    private Adaptador ad;
     private final int SECUNDARIA = 2;
-    private final int ANADIR = 3;
-    private final int EDITAR = 4;
+    private Adaptador ad;
     private ImageView ivFoto;
     int posicion, contador;
     private ArrayList <Foto> fotos;
     private GestorInmuebleProvider gip;
     private GestorFotoProvider gfp;
+    private MenuItem menuItem;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
         getLoaderManager().initLoader(0, null, this);
+
+
         fotos = new ArrayList();
         ivFoto = (ImageView)findViewById(R.id.ivFoto);
 
@@ -50,7 +53,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         gfp = new GestorFotoProvider(this);
 
         final ListView lv = (ListView) findViewById(R.id.listaInmuebles);
-        final Context contexto = this;
         final DetalleListaInmuebles fragmentoDetalle = (DetalleListaInmuebles) getFragmentManager().findFragmentById(R.id.fragment4);
         final boolean horizontal = fragmentoDetalle != null && fragmentoDetalle.isInLayout();
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -64,12 +66,11 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                 if (horizontal) {
                     posicion = position;
                     contador = 0;
-                    if(gfp.select(id) != null)
+                    if (gfp.select(id) != null)
                         fotos = gfp.select(inmueble.getId());
-
                     cargarImagenes();
                 } else {
-                    Intent intent = new Intent(contexto, Secundaria.class);
+                    Intent intent = new Intent(Principal.this, Secundaria.class);
                     intent.putExtra("id", inmueble.getId());
                     startActivityForResult(intent, SECUNDARIA);
                 }
@@ -83,11 +84,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == ANADIR || requestCode == EDITAR && resultCode == RESULT_OK){
-
-            //ELIMINAR QUE DEVUELVA RESULTADO
-        }
-        else
         if (requestCode == SECUNDARIA && resultCode == RESULT_OK) {
             posicion = (Integer)data.getExtras().get("posicion");
             contador = (Integer) data.getExtras().get("contador");
@@ -99,6 +95,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.principal, menu);
+        String usuario = getPreferenciasCompartidas();
+        menuItem = menu.findItem(R.id.preferencias_compartidas);
+        menuItem.setTitle(usuario);
         return true;
     }
 
@@ -108,7 +107,23 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         if (id == R.id.action_anadir) {
             Intent intent = new Intent(this, Anadir.class);
             intent.putExtra("accion", "anadir");
-            startActivityForResult(intent, ANADIR);
+            startActivity(intent);
+            return true;
+        }else if(id == R.id.preferencias_compartidas){
+            final EditText input = new EditText(this);
+            input.setText(getPreferenciasCompartidas());
+            new AlertDialog.Builder(this)
+                    .setTitle(getResources().getString(R.string.cambio_usuario))
+                    .setView(input)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            setPreferenciasCompartidas(input.getText().toString());
+                            String usuario = getPreferenciasCompartidas();
+                            menuItem.setTitle(usuario);
+                        }
+                    })
+                    .setIcon(getResources().getDrawable(R.drawable.ic_action_person))
+                    .show();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -132,13 +147,21 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         Inmueble inmueble = GestorInmuebleProvider.getRow(cursor);
         cursor.close();
         if (id == R.id.action_eliminar) {
-            gip.delete(inmueble);
+            int inmuebleEliminado = gip.delete(inmueble);
+            eliminarFotos(gfp.select(inmueble.getId()));
+            int fotoEliminada = gfp.delete(inmueble.getId());
+            if(inmuebleEliminado == 1 && fotoEliminada == 1)
+                tostada(getResources().getString(R.string.eliminar_todo));
+            else if(inmuebleEliminado == 1)
+                tostada(getResources().getString(R.string.eliminar_inmueble));
+            else
+                tostada(getResources().getString(R.string.eliminar_no));
             return true;
         }else if (id == R.id.action_editar) {
             Intent intent = new Intent(this, Anadir.class);
             intent.putExtra("inmueble", inmueble);
             intent.putExtra("accion", "editar");
-            startActivityForResult(intent, EDITAR);
+            startActivity(intent);
             return true;
         }
         return super.onContextItemSelected(item);
@@ -161,7 +184,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         contador++;
         if(fotos.size() == contador)
             contador = 0;
-        if(fotos.size() > contador){
+        else if(fotos.size() > contador){
             Bitmap imagen = BitmapFactory.decodeFile(fotos.get(contador).getRuta());
             ivFoto.setImageBitmap(imagen);
         }
@@ -171,10 +194,34 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         contador--;
         if(contador < 0)
             contador = fotos.size() -1;
-        if(fotos.size() > contador){
+        else if(fotos.size() > contador){
             Bitmap imagen = BitmapFactory.decodeFile(fotos.get(contador).getRuta());
             ivFoto.setImageBitmap(imagen);
         }
+    }
+
+    public void eliminarFotos(ArrayList <Foto> fotos){
+        File file = null;
+        for(int i=0; i<fotos.size(); i++){
+            file= new File(fotos.get(i).getRuta());
+            if(file.exists())
+                file.delete();
+        }
+    }
+
+    public String getPreferenciasCompartidas(){
+        SharedPreferences pc;
+        pc = getPreferences(Context.MODE_PRIVATE);
+        String r = pc.getString("usuario", "Josué");
+        return r;
+    }
+
+    public void setPreferenciasCompartidas(String usuario){
+        SharedPreferences pc;
+        pc = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor ed = pc.edit();
+        ed.putString("usuario", usuario);
+        ed.commit();
     }
 
     @Override

@@ -9,7 +9,7 @@
     <fragment
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:name="com.example.josu.inmoprovider.ListaInmuebles"
+        android:name="com.example.josu.inmoprov.ListaInmuebles"
         android:id="@+id/fragment3"
         tools:layout="@layout/fragment_lista_inmuebles"
         android:layout_weight="1"
@@ -18,7 +18,7 @@
     <fragment
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:name="com.example.josu.inmoprovider.DetalleListaInmuebles"
+        android:name="com.example.josu.inmoprov.DetalleListaInmuebles"
         android:id="@+id/fragment4"
         android:layout_weight="1"
         tools:layout="@layout/fragment_detalle_lista_inmuebles"

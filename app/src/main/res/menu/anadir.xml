@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.josu.inmoprovider.Anadir" >
+    tools:context="com.example.josu.inmoprov.Anadir" >
     <item android:id="@+id/action_camara"
         android:icon="@drawable/ic_action_camera"
-        android:title="@string/action_anadir"
+        android:title="@string/action_foto"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
 </menu>

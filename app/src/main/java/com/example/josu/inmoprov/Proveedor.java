@@ -1,4 +1,4 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -17,17 +17,17 @@ import android.util.Log;
 public class Proveedor extends ContentProvider {
 
     private Ayudante abd;
-    static String AUTORIDAD = "com.example.josu.inmoprovider";
+    static String AUTORIDAD = "com.example.josu.inmoprov";
     private static final UriMatcher convierteUri2Int;
     private static final int INMUEBLES = 1;
-    private static final int INMUEBLES_ID = 2;
+    private static final int INMUEBLE_ID = 2;
     private static final int FOTOS = 4;
     private static final int FOTO_ID = 5;
 
     static {
         convierteUri2Int = new UriMatcher(UriMatcher.NO_MATCH);
         convierteUri2Int.addURI(AUTORIDAD, Contrato.TablaInmueble.TABLA, INMUEBLES);
-        convierteUri2Int.addURI(AUTORIDAD, Contrato.TablaInmueble.TABLA + "/#", INMUEBLES_ID);
+        convierteUri2Int.addURI(AUTORIDAD, Contrato.TablaInmueble.TABLA + "/#", INMUEBLE_ID);
         convierteUri2Int.addURI(AUTORIDAD, Contrato.TablaFoto.TABLA, FOTOS);
         convierteUri2Int.addURI(AUTORIDAD, Contrato.TablaFoto.TABLA + "/#", FOTO_ID);
     }
@@ -42,13 +42,13 @@ public class Proveedor extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] proyeccion, String condicion, String[] parametros, String orderBy) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        if(convierteUri2Int.match(uri) == INMUEBLES || convierteUri2Int.match(uri) == INMUEBLES_ID)
+        if(convierteUri2Int.match(uri) == INMUEBLES || convierteUri2Int.match(uri) == INMUEBLE_ID)
             qb.setTables(Contrato.TablaInmueble.TABLA);
         else
             qb.setTables(Contrato.TablaFoto.TABLA);
         switch (convierteUri2Int.match(uri)) {
             case INMUEBLES: break;
-            case INMUEBLES_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
+            case INMUEBLE_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
                 break;
             case FOTOS: break;
             case FOTO_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
@@ -106,14 +106,14 @@ public class Proveedor extends ContentProvider {
         SQLiteDatabase db = abd.getWritableDatabase();
         switch (convierteUri2Int.match(uri)) {
             case INMUEBLES: break;
-            case INMUEBLES_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
+            case INMUEBLE_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
                 break;
             case FOTOS: break;
             case FOTO_ID: condicion = condicion + "_id = " + uri.getLastPathSegment();
                 break;
             default: throw new IllegalArgumentException("URI " + uri);
         }
-        if(convierteUri2Int.match(uri) == INMUEBLES || convierteUri2Int.match(uri) == INMUEBLES_ID){
+        if(convierteUri2Int.match(uri) == INMUEBLES || convierteUri2Int.match(uri) == INMUEBLE_ID){
             int cuenta = db.delete(Contrato.TablaInmueble.TABLA, condicion, parametros);
             getContext().getContentResolver().notifyChange(uri, null);
             return cuenta;

@@ -1,11 +1,10 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-
 import java.util.ArrayList;
 
 /**
@@ -43,6 +42,13 @@ public class GestorFotoProvider {
     public int delete(Foto objeto) {
         String condicion = Contrato.TablaFoto._ID + " = ?";
         String[] argumentos = { objeto.getId() + "" };
+        int cuenta = cr.delete(uri, condicion,argumentos);
+        return cuenta;
+    }
+
+    public int delete(long idInmueble) {
+        String condicion = Contrato.TablaFoto.ID_INMUEBLE + " = ?";
+        String[] argumentos = { idInmueble + "" };
         int cuenta = cr.delete(uri, condicion,argumentos);
         return cuenta;
     }

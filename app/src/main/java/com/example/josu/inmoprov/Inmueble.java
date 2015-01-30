@@ -1,9 +1,7 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.ArrayList;
 
 /**
  * Created by Josué on 04/12/2014.
@@ -113,7 +111,7 @@ public class Inmueble implements Parcelable, Comparable<Inmueble>{
     public int describeContents() {
         return 0;
     }
-//long id, int habitaciones, int subido, int tipo, float precio, String localidad, String direccion
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(this.id);
@@ -148,7 +146,7 @@ public class Inmueble implements Parcelable, Comparable<Inmueble>{
             };
 
     @Override
-    public int compareTo(Inmueble another) {//NO SÉ SI AQUÍ TENGO QUE HACER ALGO
+    public int compareTo(Inmueble another) {
         long a = getId();
         long b = another.getId();
         if(a < b)

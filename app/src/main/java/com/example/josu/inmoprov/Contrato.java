@@ -1,4 +1,4 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -15,7 +15,7 @@ public class Contrato {
         public static final String HABITACIONES = "habitaciones";
         public static final String PRECIO = "precio";
         public static final String SUBIDO = "subido";
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.josu.inmueble";//Inmueble en vez de Inmuebles?
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.josu.inmueble";
         public static final Uri CONTENT_URI =Uri.parse("content://" + Proveedor.AUTORIDAD + "/" + TABLA);
 
     }

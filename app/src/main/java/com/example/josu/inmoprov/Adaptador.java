@@ -1,16 +1,13 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -46,7 +43,7 @@ public class Adaptador extends CursorAdapter {
         tv1.setText(tipo(inmueble));
         tv2.setText(inmueble.getDireccion());
         tv3.setText(inmueble.getLocalidad());
-        tv4.setText((int) (inmueble.getPrecio()) + " €");
+        tv4.setText((int)(inmueble.getPrecio()) + " €");
         switch(inmueble.getHabitaciones()){
             case 0:{
                 iv.setImageResource(R.drawable.una);

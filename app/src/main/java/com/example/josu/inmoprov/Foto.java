@@ -1,4 +1,4 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -64,7 +64,7 @@ public class Foto implements Parcelable {
     public int describeContents() {
         return 0;
     }
-    //int id, int idInmueble, String ruta
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(this.id);

@@ -1,13 +1,10 @@
-package com.example.josu.inmoprovider;
+package com.example.josu.inmoprov;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,25 +14,22 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 
 
 public class Anadir extends Activity {
 
+    private static final int FOTO = 1;
     private EditText etLocalidad, etDireccion, etPrecio;
     private Spinner spHabitaciones, spTipo;
     private Button boton;
     private String accion;
     private int numFotos;
     private TextView tvFotos;
-    private Uri uri;
     private GestorInmuebleProvider gip;
     private Inmueble inmuebleActual;
     private GestorFotoProvider gfp;
@@ -66,8 +60,10 @@ public class Anadir extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(accion.equals("editar"))
+        if(accion.equals("editar")){
             getMenuInflater().inflate(R.menu.anadir, menu);
+            setTitle(getResources().getString(R.string.title_activity_editar));
+        }
         return true;
     }
 
@@ -84,10 +80,9 @@ public class Anadir extends Activity {
     public void anadir(View v){
         if(!accion.equals("editar")){
             Inmueble inmueble = new Inmueble(spHabitaciones.getSelectedItemPosition(), 0, spTipo.getSelectedItemPosition(), Float.valueOf(etPrecio.getText().toString()), etLocalidad.getText().toString(), etDireccion.getText().toString());
-            uri = gip.insert(inmueble);
-        }
-
-        else{
+            gip.insert(inmueble);
+            tostada(getResources().getString(R.string.anadir_ok));
+        } else{
             inmuebleActual.setLocalidad(etLocalidad.getText().toString());
             inmuebleActual.setDireccion(etDireccion.getText().toString());
             inmuebleActual.setTipo(spTipo.getSelectedItemPosition());
@@ -96,11 +91,11 @@ public class Anadir extends Activity {
                 etPrecio.setText(etPrecio.getText().toString().replace("€", ""));
             inmuebleActual.setPrecio(Float.valueOf(etPrecio.getText().toString()));
             int actualizado = gip.update(inmuebleActual);
-            tostada("Si es 1 es satisfactorio si es 0 es que no se ha actualizado la base de datos: " + actualizado);
+            if(actualizado == 1)
+                tostada(getResources().getString(R.string.actualizar_ok));
+            else
+                tostada(getResources().getString(R.string.actualizar_no));
         }
-
-        Intent i = new Intent();
-        setResult(RESULT_OK, i);
         finish();
     }
 
@@ -108,17 +103,15 @@ public class Anadir extends Activity {
         Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
     }
 
-    private static final int IDACTIVIDADFOTO = 1;
-
     public void camara(){
         Intent i = new Intent ("android.media.action.IMAGE_CAPTURE");
-        startActivityForResult(i, IDACTIVIDADFOTO);
+        startActivityForResult(i, FOTO);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == IDACTIVIDADFOTO && resultCode == RESULT_OK){
+        if(requestCode == FOTO && resultCode == RESULT_OK){
             Bitmap foto = data.getParcelableExtra("data");
             try {
                 guardarFoto(foto);
@@ -142,7 +135,6 @@ public class Anadir extends Activity {
                 tvFotos.setVisibility(View.VISIBLE);
             tvFotos.setText(numFotos + " " + getResources().getString(R.string.fotos_anadidas));
             Foto f = new Foto(inmuebleActual.getId(), archivo.getAbsolutePath());
-            //gf.insert(f);
             gfp.insert(f);
         }
     }
