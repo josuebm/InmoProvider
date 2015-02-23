@@ -23,6 +23,7 @@
     <string name="eliminar_inmueble">Property deleted</string>
     <string name="eliminar_no">Property not deleted</string>
     <string name="cambio_usuario">User</string>
+    <string name="action_sincronizar">Synchronise</string>
 
     <string-array name="tipos">
         <item>Flat</item>

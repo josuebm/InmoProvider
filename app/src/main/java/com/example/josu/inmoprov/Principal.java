@@ -13,7 +13,9 @@ import android.net.Uri;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,8 +26,32 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 
 public class Principal extends Activity implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -38,6 +64,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     private GestorInmuebleProvider gip;
     private GestorFotoProvider gfp;
     private MenuItem menuItem;
+    private String archivoASubir = null;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -125,6 +152,20 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                     .setIcon(getResources().getDrawable(R.drawable.ic_action_person))
                     .show();
             return true;
+        }else if(id == R.id.action_sincronizar){
+            ArrayList <Inmueble> lista = gip.select();
+            boolean sincronizado = true;
+            for(int i=0; i<lista.size(); i++){
+                if(lista.get(i).getSubido() == 0){
+                    sincronizado = false;
+                    new SubirInmueble().execute(lista.get(i));
+                }
+            }
+            if(sincronizado)
+                tostada("Todos los inmuebles están sincronizados");
+            else
+                tostada("Se han sincronizado todos los inmuebles");
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -168,7 +209,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     }
 
     public void tostada(String mensaje){
-        Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
 
     public void cargarImagenes(){
@@ -240,6 +281,120 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         ad.swapCursor(data);
+    }
+
+    class SubirInmueble extends AsyncTask<Inmueble, Integer, String> {
+
+        Inmueble inmueble;
+
+        public String postInmueble(String urlPeticion, Inmueble inmueble) throws IOException {
+            HttpClient clienteHttp = new DefaultHttpClient();
+            HttpPost post = new HttpPost(urlPeticion);
+            List<NameValuePair> pairs = new ArrayList();
+            pairs.add(new BasicNameValuePair("idAndroid", String.valueOf(inmueble.getId())));
+            pairs.add(new BasicNameValuePair("localidad", inmueble.getLocalidad()));
+            pairs.add(new BasicNameValuePair("direccion", inmueble.getDireccion()));
+            pairs.add(new BasicNameValuePair("tipo", String.valueOf(inmueble.getTipo())));
+            pairs.add(new BasicNameValuePair("habitaciones", String.valueOf(inmueble.getHabitaciones())));
+            pairs.add(new BasicNameValuePair("precio", String.valueOf(inmueble.getPrecio())));
+            pairs.add(new BasicNameValuePair("usuario", getPreferenciasCompartidas()));
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+            HttpResponse respuestaHttp = clienteHttp.execute(post);
+            String respuesta = EntityUtils.toString(respuestaHttp.getEntity());
+            return respuesta;
+        }
+
+        String url = "http://192.168.1.102:8080/inmobiliaria/control?target=inmueble&op=insert&action=op";
+
+        @Override
+        protected String doInBackground(Inmueble... params) {
+            inmueble = params[0];
+            String r = null;
+            try {
+                r = postInmueble(url, inmueble);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return r;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            inmueble.setSubido(1);
+            Log.v("Sincronizado", inmueble.getId()+"");
+            gip.update(inmueble);
+            s = s.substring(s.lastIndexOf("<tr>"), s.lastIndexOf("</tr>"));
+            s = s.substring(s.indexOf("<td>"), s.indexOf("</td>"));
+            s = s.substring(s.indexOf(">")+1);
+
+            if (gfp.select(inmueble.getId()) != null){
+                fotos = gfp.select(inmueble.getId());
+                for(int i=0; i<fotos.size(); i++){
+                    archivoASubir = fotos.get(i).getRuta();
+                    new SubirFoto().execute(s);
+                }
+
+            }
+
+        }
+    }
+
+    class SubirFoto extends AsyncTask<String, Integer, String> {
+
+        public String postFile(String urlPeticion, String nombreParametro, String uriArchivo) {
+            //urlPeticion es la URL de envío
+            //nombreParametro es el name del input del html
+            //nombreArchivo es el uri.getPath()
+            String resultado="";
+            int status=0;
+            try {
+                URL url = new URL(urlPeticion);
+                HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
+                conexion.setDoOutput(true);
+                conexion.setRequestMethod("POST");
+                FileBody fileBody = new FileBody(new File(uriArchivo));
+                MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.STRICT);
+                multipartEntity.addPart(nombreParametro, fileBody);
+                conexion.setRequestProperty("Content-Type", multipartEntity.getContentType().getValue());
+                OutputStream out = conexion.getOutputStream();
+                try {
+                    multipartEntity.writeTo(out);
+                }catch(Exception e){
+                    return e.toString();
+                }finally {
+                    out.close();
+                }
+                BufferedReader in = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+                String decodedString;
+                while ((decodedString = in.readLine()) != null) {
+                    resultado+=decodedString+"\n";
+                }
+                in.close();
+                status = conexion.getResponseCode();
+            } catch (MalformedURLException ex) {
+                return ex.toString();
+            } catch (IOException ex) {
+                return ex.toString();
+            }
+            return resultado+"\n"+status;
+        }
+
+        String url = "http://192.168.1.102:8080/inmobiliaria/control?target=foto&op=insert&action=op";
+
+        @Override
+        protected String doInBackground(String... params) {
+            url += "&idinmueble=" + params[0];
+            String r = postFile(url, "file", archivoASubir);
+            //Toast.makeText(Principal.this, "entra en doInBackground", Toast.LENGTH_LONG).show();
+            return r;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(Principal.this, "hecho", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

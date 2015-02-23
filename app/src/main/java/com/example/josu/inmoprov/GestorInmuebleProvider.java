@@ -6,6 +6,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.util.ArrayList;
+
 /**
  * Created by Josué on 28/01/2015.
  */
@@ -68,5 +70,19 @@ public class GestorInmuebleProvider {
         objeto.setPrecio(c.getFloat(5));
         objeto.setSubido(c.getInt(6));
         return objeto;
+    }
+
+    public ArrayList<Inmueble> select() {
+        ArrayList<Inmueble> lo = new ArrayList();
+        Cursor c = cr.query(uri, null, null, null, null);
+        c.moveToFirst();
+        Inmueble objeto;
+        while (!c.isAfterLast()) {
+            objeto = getRow(c);
+            lo.add(objeto);
+            c.moveToNext();
+        }
+        c.close();
+        return lo;
     }
 }

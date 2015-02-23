@@ -23,6 +23,7 @@
     <string name="eliminar_inmueble">Inmueble eliminado</string>
     <string name="eliminar_no">Inmueble no eliminado</string>
     <string name="cambio_usuario">Usuario</string>
+    <string name="action_sincronizar">Sincronizar</string>
 
     <string-array name="tipos">
         <item>Piso</item>

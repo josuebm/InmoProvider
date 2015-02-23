@@ -46,19 +46,34 @@ public class Adaptador extends CursorAdapter {
         tv4.setText((int)(inmueble.getPrecio()) + " €");
         switch(inmueble.getHabitaciones()){
             case 0:{
-                iv.setImageResource(R.drawable.una);
+                if(inmueble.getSubido()==0)
+                    iv.setImageResource(R.drawable.una);
+                else
+                    iv.setImageResource(R.drawable.una_check);
             }break;
             case 1:{
-                iv.setImageResource(R.drawable.dos);
+                if(inmueble.getSubido()==0)
+                    iv.setImageResource(R.drawable.dos);
+                else
+                    iv.setImageResource(R.drawable.dos_check);
             }break;
             case 2:{
-                iv.setImageResource(R.drawable.tres);
+                if(inmueble.getSubido()==0)
+                    iv.setImageResource(R.drawable.tres);
+                else
+                    iv.setImageResource(R.drawable.tres_check);
             }break;
             case 3:{
-                iv.setImageResource(R.drawable.cuatro);
+                if(inmueble.getSubido()==0)
+                    iv.setImageResource(R.drawable.cuatro);
+                else
+                    iv.setImageResource(R.drawable.cuatro_check);
             }break;
             case 4:{
-                iv.setImageResource(R.drawable.cinco);
+                if(inmueble.getSubido()==0)
+                    iv.setImageResource(R.drawable.cinco);
+                else
+                    iv.setImageResource(R.drawable.cinco_check);
             }
         }
     }

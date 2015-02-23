@@ -3,6 +3,7 @@ package com.example.josu.inmoprov;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -14,11 +15,23 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 
 public class Anadir extends Activity {
@@ -82,7 +95,9 @@ public class Anadir extends Activity {
             Inmueble inmueble = new Inmueble(spHabitaciones.getSelectedItemPosition(), 0, spTipo.getSelectedItemPosition(), Float.valueOf(etPrecio.getText().toString()), etLocalidad.getText().toString(), etDireccion.getText().toString());
             gip.insert(inmueble);
             tostada(getResources().getString(R.string.anadir_ok));
+            finish();
         } else{
+            new EliminarInmueble().execute(inmuebleActual);
             inmuebleActual.setLocalidad(etLocalidad.getText().toString());
             inmuebleActual.setDireccion(etDireccion.getText().toString());
             inmuebleActual.setTipo(spTipo.getSelectedItemPosition());
@@ -96,7 +111,6 @@ public class Anadir extends Activity {
             else
                 tostada(getResources().getString(R.string.actualizar_no));
         }
-        finish();
     }
 
     public void tostada(String mensaje){
@@ -186,5 +200,43 @@ public class Anadir extends Activity {
         boton = (Button)findViewById(R.id.btAnadir);
         tvFotos = (TextView)findViewById(R.id.tvFoto);
         tvFotos.setVisibility(View.INVISIBLE);
+    }
+
+    class EliminarInmueble extends AsyncTask<Inmueble, Integer, String> {
+
+        Inmueble inmueble;
+
+        public String postInmueble(String urlPeticion, Inmueble inmueble) throws IOException {
+            HttpClient clienteHttp = new DefaultHttpClient();
+            HttpPost post = new HttpPost(urlPeticion);
+            List<NameValuePair> pairs = new ArrayList();
+            pairs.add(new BasicNameValuePair("idAndroid", String.valueOf(inmueble.getId())));
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+            HttpResponse respuestaHttp = clienteHttp.execute(post);
+            String respuesta = EntityUtils.toString(respuestaHttp.getEntity());
+            return respuesta;
+        }
+
+        String url = "http://192.168.1.102:8080/inmobiliaria/control?target=inmueble&op=delete&action=opAndroid";
+
+        @Override
+        protected String doInBackground(Inmueble... params) {
+            inmueble = params[0];
+            String r = null;
+            try {
+                r = postInmueble(url, inmueble);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return r;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            inmueble.setSubido(0);
+            gip.update(inmueble);
+            finish();
+        }
     }
 }

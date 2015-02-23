@@ -6,6 +6,11 @@
         android:title="@string/preferencias_compartidas"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_sincronizar"
+        android:icon="@drawable/ic_action_refresh"
+        android:title="@string/action_sincronizar"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
     <item android:id="@+id/action_anadir"
         android:icon="@drawable/ic_action_new"
         android:title="@string/action_anadir"
