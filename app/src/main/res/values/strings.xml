@@ -24,6 +24,8 @@
     <string name="eliminar_no">Inmueble no eliminado</string>
     <string name="cambio_usuario">Usuario</string>
     <string name="action_sincronizar">Sincronizar</string>
+    <string name="pre_sincronizado">Todos los elementos están sincronizados.</string>
+    <string name="ahora_sincronizado">Todos los elementos han sido sincronizados.</string>
 
     <string-array name="tipos">
         <item>Piso</item>

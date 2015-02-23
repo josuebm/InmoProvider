@@ -24,6 +24,8 @@
     <string name="eliminar_no">Property not deleted</string>
     <string name="cambio_usuario">User</string>
     <string name="action_sincronizar">Synchronise</string>
+    <string name="pre_sincronizado">All elements are synchronised</string>
+    <string name="ahora_sincronizado">All elements have been synchronised</string>
 
     <string-array name="tipos">
         <item>Flat</item>

@@ -67,7 +67,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     private GestorInmuebleProvider gip;
     private GestorFotoProvider gfp;
     private MenuItem menuItem;
-    private String archivoASubir = null;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -165,9 +164,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                 }
             }
             if(sincronizado)
-                tostada("Todos los inmuebles están sincronizados");
+                tostada(getResources().getString(R.string.pre_sincronizado));
             else
-                tostada("Se han sincronizado todos los inmuebles");
+                tostada(getResources().getString(R.string.ahora_sincronizado));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -332,7 +331,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             inmueble.setSubido(1);
-            Log.v("Sincronizado", inmueble.getId()+"");
             gip.update(inmueble);
             s = s.substring(s.lastIndexOf("<tr>"), s.lastIndexOf("</tr>"));
             s = s.substring(s.indexOf("<td>"), s.indexOf("</td>"));
@@ -401,7 +399,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             url += "&idinmueble=" + params[0];
             String rutaArchivo = params[1];
             String r = postFile(url, "file", rutaArchivo);
-            //Toast.makeText(Principal.this, "entra en doInBackground", Toast.LENGTH_LONG).show();
             return r;
         }
 
@@ -409,7 +406,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-            Toast.makeText(Principal.this, "hecho", Toast.LENGTH_SHORT).show();
         }
     }
 
