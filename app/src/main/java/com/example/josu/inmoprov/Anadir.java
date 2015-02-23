@@ -2,6 +2,7 @@ package com.example.josu.inmoprov;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -220,6 +221,12 @@ public class Anadir extends Activity {
         String url = "http://192.168.1.102:8080/inmobiliaria/control?target=inmueble&op=delete&action=opAndroid";
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        }
+
+        @Override
         protected String doInBackground(Inmueble... params) {
             inmueble = params[0];
             String r = null;
@@ -236,6 +243,7 @@ public class Anadir extends Activity {
             super.onPostExecute(s);
             inmueble.setSubido(0);
             gip.update(inmueble);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             finish();
         }
     }

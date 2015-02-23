@@ -6,9 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -197,6 +200,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                 tostada(getResources().getString(R.string.eliminar_inmueble));
             else
                 tostada(getResources().getString(R.string.eliminar_no));
+            new EliminarInmueble().execute(inmueble);
             return true;
         }else if (id == R.id.action_editar) {
             Intent intent = new Intent(this, Anadir.class);
@@ -307,6 +311,12 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         String url = "http://192.168.1.102:8080/inmobiliaria/control?target=inmueble&op=insert&action=op";
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        }
+
+        @Override
         protected String doInBackground(Inmueble... params) {
             inmueble = params[0];
             String r = null;
@@ -331,12 +341,10 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             if (gfp.select(inmueble.getId()) != null){
                 fotos = gfp.select(inmueble.getId());
                 for(int i=0; i<fotos.size(); i++){
-                    archivoASubir = fotos.get(i).getRuta();
-                    new SubirFoto().execute(s);
+                    new SubirFoto().execute(s, fotos.get(i).getRuta());
                 }
-
             }
-
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
     }
 
@@ -383,9 +391,16 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         String url = "http://192.168.1.102:8080/inmobiliaria/control?target=foto&op=insert&action=op";
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        }
+
+        @Override
         protected String doInBackground(String... params) {
             url += "&idinmueble=" + params[0];
-            String r = postFile(url, "file", archivoASubir);
+            String rutaArchivo = params[1];
+            String r = postFile(url, "file", rutaArchivo);
             //Toast.makeText(Principal.this, "entra en doInBackground", Toast.LENGTH_LONG).show();
             return r;
         }
@@ -393,7 +408,48 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             Toast.makeText(Principal.this, "hecho", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    class EliminarInmueble extends AsyncTask<Inmueble, Integer, String> {
+
+        public String postInmueble(String urlPeticion, Inmueble inmueble) throws IOException {
+            HttpClient clienteHttp = new DefaultHttpClient();
+            HttpPost post = new HttpPost(urlPeticion);
+            List<NameValuePair> pairs = new ArrayList();
+            pairs.add(new BasicNameValuePair("idAndroid", String.valueOf(inmueble.getId())));
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+            HttpResponse respuestaHttp = clienteHttp.execute(post);
+            String respuesta = EntityUtils.toString(respuestaHttp.getEntity());
+            return respuesta;
+        }
+
+        String url = "http://192.168.1.102:8080/inmobiliaria/control?target=inmueble&op=delete&action=opAndroid";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        }
+
+        @Override
+        protected String doInBackground(Inmueble... params) {
+            Inmueble inmueble = params[0];
+            String r = null;
+            try {
+                r = postInmueble(url, inmueble);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return r;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
     }
 
